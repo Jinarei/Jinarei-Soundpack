@@ -1,4 +1,4 @@
-## Interface: 100002
+## Interface: 100003
 ## Title: Bibliothèque de Sons
 ## Notes: Addon de Jinarei pour gérer une bibliothèque de sons.
 ## Author: Jinarei
