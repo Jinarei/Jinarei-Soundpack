@@ -2,6 +2,6 @@
 ## Title: Bibliothèque de Sons
 ## Notes: Addon de Jinarei pour gérer une bibliothèque de sons.
 ## Author: Jinarei
-## Version: 1.0
+## Version: 1.0.1
 
 Jinarei-Soundpack.lua
