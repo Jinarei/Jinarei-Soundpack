@@ -1,7 +1,10 @@
 ## Interface: 110002
-## Title: Bibliothèque de Sons
+## Title: Jinarei-Soundpack
 ## Notes: Addon de Jinarei pour gérer une bibliothèque de sons.
 ## Author: Jinarei
 ## Version: 1.0.1
 
+libs\LibStub\LibStub.lua
+libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
+embeds.xml
 Jinarei-Soundpack.lua

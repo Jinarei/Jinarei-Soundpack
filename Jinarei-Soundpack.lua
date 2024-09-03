@@ -1,16 +1,39 @@
-SoundLibrary = {
-    ["bloodlust"] = "Interface\\AddOns\\SoundLibrary\\Sounds\\bloodlust.mp3",
-    ["bloodlust2"] = "Interface\\AddOns\\SoundLibrary\\Sounds\\bloodlust2.mp3",
-    ["bloodlust3"] = "Interface\\AddOns\\SoundLibrary\\Sounds\\bloodlust3.mp3",
-    ["bloodlust4"] = "Interface\\AddOns\\SoundLibrary\\Sounds\\bloodlust4.mp3",
-    ["bloodlust5"] = "Interface\\AddOns\\SoundLibrary\\Sounds\\bloodlust5.mp3",
-    ["bloodlust6"] = "Interface\\AddOns\\SoundLibrary\\Sounds\\bloodlust6.mp3",
-    ["bloodlust7"] = "Interface\\AddOns\\SoundLibrary\\Sounds\\bloodlust7.mp3",
-    ["bloodlust8"] = "Interface\\AddOns\\SoundLibrary\\Sounds\\bloodlust8.mp3",
-}
+local LSM = LibStub("LibSharedMedia-3.0") 
 
-function GetSoundPath(soundName)
-    return SoundLibrary[soundName]
-end
+LSM:Register("sound", "|cFF00FF00ahhhh|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\ahhhh.ogg]])
+LSM:Register("sound", "|cFF00FF00awpcs|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\awpcs.ogg]])
+LSM:Register("sound", "|cFF00FF00bloodlust|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\bloodlust.ogg]])
+LSM:Register("sound", "|cFF00FF00bloodlust2|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\bloodlust2.ogg]])
+LSM:Register("sound", "|cFF00FF00bloodlust3|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\bloodlust3.ogg]])
+LSM:Register("sound", "|cFF00FF00bloodlust4|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\bloodlust4.ogg]])
+LSM:Register("sound", "|cFF00FF00bloodlust5|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\bloodlust5.ogg]])
+LSM:Register("sound", "|cFF00FF00bloodlust6|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\bloodlust6.ogg]])
+LSM:Register("sound", "|cFF00FF00bloodlust7|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\bloodlust7.ogg]])
+LSM:Register("sound", "|cFF00FF00bloodlust8|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\bloodlust8.ogg]])
+LSM:Register("sound", "|cFF00FF00bombe|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\bombe.mp3]])
+LSM:Register("sound", "|cFF00FF00boubou|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\boubou.mp3]])
+LSM:Register("sound", "|cFF00FF00boule|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\boule.mp3]])
+LSM:Register("sound", "|cFF00FF00cendrillon|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\cendrillon.ogg]])
+LSM:Register("sound", "|cFF00FF00chargefeu|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\chargefeu.mp3]])
+LSM:Register("sound", "|cFF00FF00chauffeur|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\chauffeur.ogg]])
+LSM:Register("sound", "|cFF00FF00dechirure|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\dechirure.mp3]])
+LSM:Register("sound", "|cFF00FF00deplete|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\deplete.mp3]])
+LSM:Register("sound", "|cFF00FF00dragon|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\dragon.ogg]])
+LSM:Register("sound", "|cFF00FF00explosion|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\explosion.mp3]])
+LSM:Register("sound", "|cFF00FF00johnny|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\johnny.ogg]])
+LSM:Register("sound", "|cFF00FF00jurassicpark|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\jurassicpark.ogg]])
+LSM:Register("sound", "|cFF00FF00levitation|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\levitation.mp3]])
+LSM:Register("sound", "|cFF00FF00loup|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\loup.ogg]])
+LSM:Register("sound", "|cFF00FF00manger|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\manger.mp3]])
+LSM:Register("sound", "|cFF00FF00mort|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\mort.mp3]])
+LSM:Register("sound", "|cFF00FF00nains|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\nains.mp3]])
+LSM:Register("sound", "|cFF00FF00reinedesneige|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\reinedesneige.ogg]])
+LSM:Register("sound", "|cFF00FF00repoussement|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\repoussement.mp3]])
+LSM:Register("sound", "|cFF00FF00revive|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\revive.mp3]])
+LSM:Register("sound", "|cFF00FF00souffrir|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\souffrir.mp3]])
+LSM:Register("sound", "|cFF00FF00storm|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\storm.mp3]])
+LSM:Register("sound", "|cFF00FF00stormnokhud|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\stormnokhud.mp3]])
+LSM:Register("sound", "|cFF00FF00terre|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\terre.mp3]])
+LSM:Register("sound", "|cFF00FF00thunder|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\thunder.mp3]])
+LSM:Register("sound", "|cFF00FF00tsunami|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\tsunami.mp3]])
 
-print("Bibliothèque de Sons chargée. Utilisez les sons via leurs chemins d'accès.")
