@@ -36,4 +36,6 @@ LSM:Register("sound", "|cFF00FF00stormnokhud|r", [[Interface\Addons\Jinarei-Soun
 LSM:Register("sound", "|cFF00FF00terre|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\terre.mp3]])
 LSM:Register("sound", "|cFF00FF00thunder|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\thunder.mp3]])
 LSM:Register("sound", "|cFF00FF00tsunami|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\tsunami.mp3]])
+LSM:Register("sound", "|cFF00FF00pause|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\pause.ogg]])
+LSM:Register("sound", "|cFF00FF00lossgets|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\lossgets.ogg]])
 
