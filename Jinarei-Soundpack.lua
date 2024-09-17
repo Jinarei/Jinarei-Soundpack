@@ -38,4 +38,5 @@ LSM:Register("sound", "|cFF00FF00thunder|r", [[Interface\Addons\Jinarei-Soundpac
 LSM:Register("sound", "|cFF00FF00tsunami|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\tsunami.mp3]])
 LSM:Register("sound", "|cFF00FF00pause|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\pause.ogg]])
 LSM:Register("sound", "|cFF00FF00lossgets|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\lossgets.ogg]])
+LSM:Register("sound", "|cFF00FF00uwu|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\uwu.ogg]])
 
