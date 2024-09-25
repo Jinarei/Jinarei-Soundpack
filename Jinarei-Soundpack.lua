@@ -43,4 +43,7 @@ LSM:Register("sound", "|cFF00FF00fireball|r", [[Interface\Addons\Jinarei-Soundpa
 LSM:Register("sound", "|cFF00FF00bloodlust9|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\bloodlust9.ogg]])
 LSM:Register("sound", "|cFF00FF00bloodlust10|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\bloodlust10.ogg]])
 LSM:Register("sound", "|cFF00FF00bloodlust11|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\bloodlust11.ogg]])
-
+LSM:Register("sound", "|cFF00FF00bloodlust12|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\bloodlust12.ogg]])
+LSM:Register("sound", "|cFF00FF00bloodlust13|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\bloodlust13.ogg]])
+LSM:Register("sound", "|cFF00FF00briseros|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\briserlesos.ogg]])
+LSM:Register("sound", "|cFF00FF00mondieu|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\mondieu.ogg]])
