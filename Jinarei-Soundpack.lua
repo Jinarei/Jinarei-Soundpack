@@ -48,3 +48,5 @@ LSM:Register("sound", "|cFF00FF00bloodlust13|r", [[Interface\Addons\Jinarei-Soun
 LSM:Register("sound", "|cFF00FF00briseros|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\briserlesos.ogg]])
 LSM:Register("sound", "|cFF00FF00mondieu|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\mondieu.ogg]])
 LSM:Register("sound", "|cFF00FF00boulenoire|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\boulenoire.ogg]])
+LSM:Register("sound", "|cFF00FF00patrick|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\patrick.ogg]])
+LSM:Register("sound", "|cFF00FF00dechainemoi|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\dechainemoi.ogg]])
