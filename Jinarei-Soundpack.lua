@@ -52,3 +52,6 @@ LSM:Register("sound", "|cFF00FF00boulenoire|r", [[Interface\Addons\Jinarei-Sound
 LSM:Register("sound", "|cFF00FF00patrick|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\patrick.ogg]])
 LSM:Register("sound", "|cFF00FF00dechainemoi|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\dechainemoi.ogg]])
 LSM:Register("sound", "|cFF00FF00supergenial|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\supergenial.ogg]])
+LSM:Register("sound", "|cFF00FF00bloodlust15|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\bloodlust15.ogg]])
+LSM:Register("sound", "|cFF00FF00GasGasGas|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\GasGasGas.ogg]])
+LSM:Register("sound", "|cFF00FF00Position|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\position.ogg]])

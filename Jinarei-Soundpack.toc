@@ -1,4 +1,4 @@
-## Interface: 110002
+## Interface: 110100
 ## Title: Jinarei-Soundpack
 ## Notes: Addon de Jinarei pour gérer une bibliothèque de sons.
 ## Author: Jinarei
