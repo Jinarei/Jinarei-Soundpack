@@ -62,3 +62,6 @@ LSM:Register("sound", "|cFF00FF00gorille|r", [[Interface\Addons\Jinarei-Soundpac
 LSM:Register("sound", "|cFF00FF00highwaytohell|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\highwaytohell.ogg]])
 LSM:Register("sound", "|cFF00FF00tranche|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\tranche.ogg]])
 LSM:Register("sound", "|cFF00FF00debout|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\debout.ogg]])
+LSM:Register("sound", "|cFF00FF00enchantix|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\enchantix.ogg]])
+LSM:Register("sound", "|cFF00FF00vachette|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\vachettte.ogg]])
+LSM:Register("sound", "|cFF00FF00soleil|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\soleil.ogg]])
