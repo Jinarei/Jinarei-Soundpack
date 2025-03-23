@@ -66,3 +66,4 @@ LSM:Register("sound", "|cFF00FF00enchantix|r", [[Interface\Addons\Jinarei-Soundp
 LSM:Register("sound", "|cFF00FF00vachette|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\vachette.ogg]])
 LSM:Register("sound", "|cFF00FF00soleil|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\soleil.ogg]])
 LSM:Register("sound", "|cFF00FF00anniversaire|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\anniversaire.ogg]])
+LSM:Register("sound", "|cFF00FF00souslevent|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\souslevent.ogg]])
