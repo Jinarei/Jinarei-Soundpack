@@ -68,3 +68,4 @@ LSM:Register("sound", "|cFF00FF00soleil|r", [[Interface\Addons\Jinarei-Soundpack
 LSM:Register("sound", "|cFF00FF00anniversaire|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\anniversaire.ogg]])
 LSM:Register("sound", "|cFF00FF00souslevent|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\souslevent.ogg]])
 LSM:Register("sound", "|cFF00FF00bloodlust8bis|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\bloodlust8bis.ogg]])
+LSM:Register("sound", "|cFF00FF00géantvert|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\geantvert.ogg]])
