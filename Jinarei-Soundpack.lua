@@ -69,3 +69,8 @@ LSM:Register("sound", "|cFF00FF00anniversaire|r", [[Interface\Addons\Jinarei-Sou
 LSM:Register("sound", "|cFF00FF00souslevent|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\souslevent.ogg]])
 LSM:Register("sound", "|cFF00FF00bloodlust8bis|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\bloodlust8bis.ogg]])
 LSM:Register("sound", "|cFF00FF00géantvert|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\geantvert.ogg]])
+LSM:Register("sound", "|cFF00FF00bloodlust16|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\bloodlust16.ogg]])
+LSM:Register("sound", "|cFF00FF00bloodlust17|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\bloodlust17.ogg]])
+LSM:Register("sound", "|cFF00FF00bloodlust18|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\bloodlust18.ogg]])
+LSM:Register("sound", "|cFF00FF00bloodlust19|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\bloodlust19.ogg]])
+LSM:Register("sound", "|cFF00FF00oui|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\oui.ogg]])
