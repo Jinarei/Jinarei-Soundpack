@@ -89,5 +89,5 @@ LSM:Register("sound", "|cFF00FF00pigeon|r", [[Interface\Addons\Jinarei-Soundpack
 LSM:Register("sound", "|cFF00FF00squalala|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\squalala.ogg]])
 LSM:Register("sound", "|cFF00FF00chiens|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\chiens.ogg]])
 LSM:Register("sound", "|cFF00FF00courir|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\courir.ogg]])
-LSM:Register("sound", "|cFF00FF00pasprêts|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\pasprêts.ogg]])
+LSM:Register("sound", "|cFF00FF00pasprets|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\pasprets.ogg]])
 LSM:Register("sound", "|cFF00FF00travail|r", [[Interface\Addons\Jinarei-Soundpack\Sounds\travail.ogg]])
