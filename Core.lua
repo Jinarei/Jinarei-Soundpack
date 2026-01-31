@@ -72,7 +72,16 @@ local TIMER_DURATION = 40
 local TIMER_END_TIME = 0
 
 local function PlaySynchronizedMusic(source, isTest)
-    -- Definition de la playlist selon le mode
+    if JinareiDB.muteMusic then
+         if JinareiDB.showDebug then
+            print("|cFF00FFFF[DEBUG]|r Music triggered but MUTE is enabled.")
+         end
+         -- On return pas tout de suite si on veut quand même afficher le timer ?
+         -- Le user a dit "enlever tout le son des musique".
+         -- Mais est-ce qu'il veut le Timer ?
+         -- On va assumer que Mute = Juste pas de son, mais le reste (Timer) fonctionne.
+    else
+        -- Definition de la playlist selon le mode
 
     local playlist = MusicList
     
@@ -103,7 +112,11 @@ local function PlaySynchronizedMusic(source, isTest)
     if JinareiDB.showDebug then
         print("|cFF00FF00Jinarei-Soundpack|r: Bloodlust détectée (Source: " .. (source or "Inconnue") .. ")! Musique: " .. track)
     end
-    PlaySoundFile(path, channel)
+    
+    if not JinareiDB.muteMusic then
+        PlaySoundFile(path, channel)
+    end
+    end
     
     -- Trigger Timer
     if JinareiTimerFrame and JinareiDB.showTimer then
@@ -248,6 +261,16 @@ local function CreateAddonSettingsPanel()
     UIDropDownMenu_Initialize(dropdown, Initialize)
     UIDropDownMenu_SetSelectedValue(dropdown, JinareiDB.channel or "Master")
     UIDropDownMenu_SetText(dropdown, JinareiDB.channel or "Master")
+
+    -- Checkbox: Mute Music
+    local chkMute = CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
+    chkMute:SetPoint("LEFT", dropdown, "RIGHT", 150, 0) 
+    chkMute.text:SetText("Couper la musique (Mute)")
+    chkMute:SetChecked(JinareiDB.muteMusic)
+    chkMute:SetScript("OnClick", function(self)
+        JinareiDB.muteMusic = self:GetChecked()
+        if JinareiDB.muteMusic then StopMusic() end -- StopMusic n'existe pas nativement facilement pour PlaySoundFile, mais au moins ca empechera la prochaine
+    end)
 
     -- Checkbox: Debug
     local chkDebug = CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
@@ -433,6 +456,7 @@ local function OnEvent(self, event, arg1, arg2, arg3, arg4, ...)
         -- NOTE: minimapPos might default to nil if we want it to center reset, but let's keep it safe
         if not JinareiDB.minimapPos then JinareiDB.minimapPos = 45 end
         if JinareiDB.showDebug == nil then JinareiDB.showDebug = false end 
+        if JinareiDB.muteMusic == nil then JinareiDB.muteMusic = false end 
         -- Changed logic vars
         if JinareiDB.noOuioui == nil then JinareiDB.noOuioui = false end
         if JinareiDB.noMetacopter == nil then JinareiDB.noMetacopter = false end
