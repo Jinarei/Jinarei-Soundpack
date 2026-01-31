@@ -14,7 +14,7 @@ local MusicList = {
     "bloodlust5.ogg",
     "bloodlust6.ogg",
     "bloodlust7.ogg",
-    "bloodlust8.ogg",
+    "bloodlust8.ogg", -- Ouioui
     "bloodlust9.ogg",
     "bloodlust10.ogg",
     "bloodlust11.ogg",
@@ -30,7 +30,7 @@ local MusicList = {
     "bloodlust21.ogg",
     "bloodlust22.ogg",
     "bloodlust23.ogg",
-    "bloodlustjin.ogg",
+    "bloodlustjin.ogg", -- Metacoptere
 }
 
 -- IDs des sorts considérés comme Bloodlust / Heroism
@@ -57,36 +57,29 @@ local BL_SPELL_IDS = {
 -- =========================================================================
 
 local frame = CreateFrame("Frame")
-frame:RegisterEvent("ADDON_LOADED") -- Register this event
+frame:RegisterEvent("ADDON_LOADED")
 frame:RegisterEvent("PLAYER_LOGIN")
-frame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-frame:RegisterEvent("CHAT_MSG_ADDON")
+frame:RegisterEvent("UNIT_SPELL_HASTE")
 
 local ADDON_PREFIX = "JINAREI_SP"
-local lastTriggerTime = 0
-local COOLDOWN_DURATION = 40 -- Anti-spam cooldown in seconds
-local DEBUG_MODE = false -- Mettre à false une fois que tout marche
+local DEBUG_MODE = false 
+local lastHaste = 0
+local SettingsCategory -- To store the settings category object
 
 local function PlaySynchronizedMusic(source, isTest)
-    -- Anti-spam check
-    if not isTest then
-        local now = GetTime()
-        if (now - lastTriggerTime) < COOLDOWN_DURATION then
-            if JinareiDB.showDebug then
-                print("|cFF00FFFF[DEBUG]|r Ignored due to cooldown (" .. math.floor(COOLDOWN_DURATION - (now - lastTriggerTime)) .. "s remaining).")
-            end
-            return
-        end
-        lastTriggerTime = now
-    end
-
     -- Definition de la playlist selon le mode
+
     local playlist = MusicList
-    if JinareiDB.jokeMode then
-        if JinareiDB.showDebug then
-            print("|cFF00FF00Jinarei|r: Mode 'Sans Ouioui' activé !")
-        end
-        playlist = { "bloodlustjin.ogg", "bloodlust8.ogg" }
+    
+    if JinareiDB.noOuioui and JinareiDB.noMetacopter then
+         -- Si les deux sont cochés -> Hasard entre les deux
+         playlist = { "bloodlustjin.ogg", "bloodlust8.ogg" }
+    elseif JinareiDB.noOuioui then
+         -- "Sans Ouioui" coché -> On force Ouioui (bloodlust8) :)
+         playlist = { "bloodlust8.ogg" }
+    elseif JinareiDB.noMetacopter then
+         -- "Sans Metacoptere" coché -> On force Metacoptere (bloodlustjin) :)
+         playlist = { "bloodlustjin.ogg" }
     end
 
     if #playlist == 0 then
@@ -108,67 +101,51 @@ local function PlaySynchronizedMusic(source, isTest)
     PlaySoundFile(path, channel)
 end
 
-local function SendSyncMessage(spellId)
-    local channel = "PARTY"
-    if IsInGroup(LE_PARTY_CATEGORY_INSTANCE) then
-        channel = "INSTANCE_CHAT"
-    elseif IsInRaid() then
-        channel = "RAID"
-    end
-    
-    -- Payload: BL:spellId:serverTime
-    local payload = string.format("BL:%d:%d", spellId, GetServerTime())
-    C_ChatInfo.SendAddonMessage(ADDON_PREFIX, payload, channel)
-end
+
 
 local JinareiMinimapButton
 local JinareiConfigFrame
 
-local function CreateConfigFrame()
-    -- Create the main frame with a nice backdrop
-    local f = CreateFrame("Frame", "JinareiConfigFrame", UIParent, "BackdropTemplate")
-    JinareiConfigFrame = f
-    f:SetSize(300, 220) -- Increased Height significantly to fit all options
-    f:SetPoint("CENTER")
-    f:SetMovable(true)
-    f:EnableMouse(true)
-    f:RegisterForDrag("LeftButton")
-    f:SetScript("OnDragStart", f.StartMoving)
-    f:SetScript("OnDragStop", f.StopMovingOrSizing)
-    f:Hide()
-    f:SetFrameStrata("DIALOG")
+local function OpenSettings()
+    if Settings and Settings.OpenToCategory then
+        Settings.OpenToCategory(SettingsCategory:GetID())
+    else
+        -- Fallback for older versions if needed, though TWW uses Settings
+        InterfaceOptionsFrame_OpenToCategory(SettingsCategory)
+    end
+end
 
-    -- Beautiful stylized backdrop
-    f:SetBackdrop({
-        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
-        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-        tile = true, tileSize = 32, edgeSize = 32,
-        insets = { left = 11, right = 12, top = 12, bottom = 11 }
-    })
+local function CreateAddonSettingsPanel()
+    -- Create the panel frame
+    local panel = CreateFrame("Frame", "JinareiOptionsPanel", UIParent)
     
-    -- Header/Title Background
-    local header = f:CreateTexture(nil, "ARTWORK")
-    header:SetTexture("Interface\\DialogFrame\\UI-DialogBox-Header")
-    header:SetWidth(300)
-    header:SetHeight(64)
-    header:SetPoint("TOP", 0, 12)
+    -- Register in the new Settings API (Dragonflight/TWW)
+    if Settings and Settings.RegisterCanvasLayoutCategory then
+        local category, layout = Settings.RegisterCanvasLayoutCategory(panel, "Jinarei Soundpack")
+        SettingsCategory = category
+        Settings.RegisterAddOnCategory(category)
+    else
+        -- Legacy Fallback (shouldn't be needed on Retail but good practice)
+        panel.name = "Jinarei Soundpack"
+        InterfaceOptions_AddCategory(panel)
+        SettingsCategory = panel 
+    end
+
+    -- --- UI ELEMENTS ---
     
-    f.title = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    f.title:SetPoint("TOP", header, "TOP", 0, -14)
-    f.title:SetText("Jinarei Soundpack")
+    -- Title
+    local title = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+    title:SetPoint("TOPLEFT", 16, -16)
+    title:SetText("Jinarei Soundpack Configuration")
 
-    -- Close Button
-    local closeBtn = CreateFrame("Button", nil, f, "UIPanelCloseButton")
-    closeBtn:SetPoint("TOPRIGHT", -5, -5)
-
-    -- Channel Dropdown Label
-    local lbl = f:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    lbl:SetPoint("TOPLEFT", 25, -50)
+    -- Dropdown Label
+    local lbl = panel:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    lbl:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -20)
     lbl:SetText("Canal Audio (Volume):")
 
     -- Dropdown
     local channels = {"Master", "Music", "SFX", "Ambience", "Dialog"}
-    local dropdown = CreateFrame("Frame", "JinareiChannelDropdown", f, "UIDropDownMenuTemplate")
+    local dropdown = CreateFrame("Frame", "JinareiChannelDropdown", panel, "UIDropDownMenuTemplate")
     dropdown:SetPoint("TOPLEFT", lbl, "BOTTOMLEFT", -15, -10)
     
     local function OnClick(self)
@@ -192,30 +169,42 @@ local function CreateConfigFrame()
     UIDropDownMenu_SetSelectedValue(dropdown, JinareiDB.channel or "Master")
     UIDropDownMenu_SetText(dropdown, JinareiDB.channel or "Master")
 
-    -- Checkbox: Debug Messages
-    local chkDebug = CreateFrame("CheckButton", nil, f, "UICheckButtonTemplate")
-    -- MOVED DOWN: More spacing below Dropdown
-    chkDebug:SetPoint("TOPLEFT", dropdown, "BOTTOMLEFT", 0, -15) 
-    chkDebug.text:SetText("Afficher les messages de Debug")
+    -- Checkbox: Debug
+    local chkDebug = CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
+    chkDebug:SetPoint("TOPLEFT", dropdown, "BOTTOMLEFT", 0, -20)
+    chkDebug.text:SetText("Afficher les debugs")
     chkDebug:SetChecked(JinareiDB.showDebug)
     chkDebug:SetScript("OnClick", function(self)
         JinareiDB.showDebug = self:GetChecked()
-        DEBUG_MODE = JinareiDB.showDebug 
+        DEBUG_MODE = JinareiDB.showDebug
+    end)
+    
+    -- Header: Filtres
+    local headerFiltres = panel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+    headerFiltres:SetPoint("TOPLEFT", chkDebug, "BOTTOMLEFT", 0, -20)
+    headerFiltres:SetText("Filtres Spéciaux (Restrictions)")
+
+    -- Checkbox: Sans Ouioui
+    local chkNoOuioui = CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
+    chkNoOuioui:SetPoint("TOPLEFT", headerFiltres, "BOTTOMLEFT", 0, -10)
+    chkNoOuioui.text:SetText("Sans Ouioui")
+    chkNoOuioui:SetChecked(JinareiDB.noOuioui)
+    chkNoOuioui:SetScript("OnClick", function(self)
+        JinareiDB.noOuioui = self:GetChecked()
     end)
 
-    -- Checkbox: Joke Mode
-    local chkJoke = CreateFrame("CheckButton", nil, f, "UICheckButtonTemplate")
-    -- MOVED DOWN: More spacing between checkboses
-    chkJoke:SetPoint("TOPLEFT", chkDebug, "BOTTOMLEFT", 0, 0)
-    chkJoke.text:SetText("Sans Ouioui et JinareiMétacoptère")
-    chkJoke:SetChecked(JinareiDB.jokeMode)
-    chkJoke:SetScript("OnClick", function(self)
-        JinareiDB.jokeMode = self:GetChecked()
+    -- Checkbox: Sans Metacoptere
+    local chkNoMeta = CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
+    chkNoMeta:SetPoint("TOPLEFT", chkNoOuioui, "BOTTOMLEFT", 0, 0)
+    chkNoMeta.text:SetText("Sans Métacoptère")
+    chkNoMeta:SetChecked(JinareiDB.noMetacopter)
+    chkNoMeta:SetScript("OnClick", function(self)
+        JinareiDB.noMetacopter = self:GetChecked()
     end)
 
-    -- Test Button (Styled)
-    local btn = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
-    btn:SetPoint("BOTTOM", 0, 20)
+    -- Test Button
+    local btn = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
+    btn:SetPoint("TOPLEFT", chkNoMeta, "BOTTOMLEFT", 0, -20)
     btn:SetSize(120, 25)
     btn:SetText("Tester le son")
     btn:SetScript("OnClick", function()
@@ -251,11 +240,7 @@ local function CreateMinimapButton()
 
     -- Click code
     btn:SetScript("OnClick", function()
-        if JinareiConfigFrame:IsShown() then
-            JinareiConfigFrame:Hide()
-        else
-            JinareiConfigFrame:Show()
-        end
+        OpenSettings()
     end)
 
     -- Tooltip
@@ -307,8 +292,10 @@ local function OnEvent(self, event, arg1, arg2, arg3, arg4, ...)
         if not JinareiDB.channel then JinareiDB.channel = "Master" end
         -- NOTE: minimapPos might default to nil if we want it to center reset, but let's keep it safe
         if not JinareiDB.minimapPos then JinareiDB.minimapPos = 45 end
-        if JinareiDB.showDebug == nil then JinareiDB.showDebug = false end -- Default True first time
-        if JinareiDB.jokeMode == nil then JinareiDB.jokeMode = false end
+        if JinareiDB.showDebug == nil then JinareiDB.showDebug = false end 
+        -- Changed logic vars
+        if JinareiDB.noOuioui == nil then JinareiDB.noOuioui = false end
+        if JinareiDB.noMetacopter == nil then JinareiDB.noMetacopter = false end
 
         -- Apply globals
         DEBUG_MODE = JinareiDB.showDebug
@@ -316,53 +303,27 @@ local function OnEvent(self, event, arg1, arg2, arg3, arg4, ...)
         print("|cFF00FF00Jinarei-Soundpack|r: Variables chargées.")
         
     elseif event == "PLAYER_LOGIN" then
-        C_ChatInfo.RegisterAddonMessagePrefix(ADDON_PREFIX)
-        CreateConfigFrame()
+        CreateAddonSettingsPanel()
         CreateMinimapButton()
+        lastHaste = UnitSpellHaste("player") -- Initialize haste on login
         print("|cFF00FF00Jinarei-Soundpack|r: Prêt (v1.0.28).")
         
-    elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
-        local unit, _, spellId = arg1, arg2, arg3
-        if unit == "player" and BL_SPELL_IDS[spellId] then
-            -- 1. Jouer pour soi
-            PlaySynchronizedMusic("Joueur")
-            -- 2. Envoyer aux autres
-            if IsInGroup() then
-                SendSyncMessage(spellId)
+    elseif event == "UNIT_SPELL_HASTE" then
+        local unit = arg1
+        if unit == "player" then
+            local currentHaste = UnitSpellHaste("player")
+            if lastHaste then
+                local diff = currentHaste - lastHaste
+                -- On cherche une augmentation subite de ~30% (Bloodlust = 30%)
+                -- On met 29.5 pour être sûr de capter même si petit arrondi
+                if diff >= 29.5 then
+                     if JinareiDB.showDebug then
+                         print("|cFF00FFFF[DEBUG]|r Haste Spike Detected: +" .. string.format("%.2f", diff) .. "%")
+                     end
+                     PlaySynchronizedMusic("HasteDetection")
+                end
             end
-        end
-        
-    elseif event == "CHAT_MSG_ADDON" then
-        local prefix, message, channel, sender = arg1, arg2, arg3, arg4
-        
-        if prefix ~= ADDON_PREFIX then return end
-
-        if DEBUG_MODE then
-            print("|cFF00FFFF[DEBUG]|r RX Prefix:", prefix, "Msg:", message, "Sender:", sender)
-        end
-        
-        -- Ignorer ses propres messages (déjà traités par UNIT_SPELLCAST_SUCCEEDED)
-        local playerName = UnitName("player")
-        local senderName = Ambiguate(sender, "none")
-        
-        -- On compare avec Ambiguate pour être sûr (gère "Name-Realm" vs "Name")
-        if senderName == playerName then
-            if DEBUG_MODE then print("|cFF00FFFF[DEBUG]|r Ignored own message.") end
-            return
-        end
-        
-        -- Vérifier si l'expéditeur est dans le groupe
-        -- Note: UnitInParty/Raid fonctionne généralement mieux avec le nom court si même royaume, 
-        -- ou nom complet si inter-serveur. On teste les deux par sécurité.
-        if not (UnitInParty(sender) or UnitInRaid(sender) or UnitInParty(senderName) or UnitInRaid(senderName)) then
-            if DEBUG_MODE then print("|cFF00FFFF[DEBUG]|r Sender not in group/raid:", sender) end
-            return
-        end
-        
-        -- Parser le message "BL:spellId:time"
-        if message:match("^BL:") then
-            if DEBUG_MODE then print("|cFF00FFFF[DEBUG]|r Valid BL message, playing sound.") end
-            PlaySynchronizedMusic(senderName)
+            lastHaste = currentHaste
         end
     end
 end
@@ -393,22 +354,11 @@ SlashCmdList["JINAREI"] = function(msg)
     if command == "test" then
         print("|cFF00FF00Jinarei-Soundpack|r: Test local de la musique sur le canal: " .. (JinareiDB.channel or "Master"))
         PlaySynchronizedMusic(nil, true)
-    elseif command == "sync" then
-        if IsInGroup() then
-            print("|cFF00FF00Jinarei-Soundpack|r: Envoi d'un signal de test au groupe...")
-            SendSyncMessage(2825) -- Envoie un faux signal Bloodlust (ID 2825)
-        else
-            print("|cFF00FF00Jinarei-Soundpack|r: Erreur: Vous devez être en groupe pour tester la synchro.")
-        end
     elseif command == "config" then
-         msg = msg:match("^%s*(.-)%s*$") -- Trim whitespace
-        if JinareiConfigFrame then 
-            if JinareiConfigFrame:IsShown() then JinareiConfigFrame:Hide() else JinareiConfigFrame:Show() end
-        end
+        OpenSettings()
     else
         print("|cFF00FF00Jinarei-Soundpack|r: Commandes disponibles:")
         print("  /jin test - Teste la musique localement")
-        print("  /jin sync - Envoie un signal de test au groupe (nécessite d'être groupé)")
         print("  /jin config - Ouvre la fenêtre de configuration")
         print("  Debug Mode: " .. (DEBUG_MODE and "|cFF00FF00ON|r" or "|cFFFF0000OFF|r"))
     end
