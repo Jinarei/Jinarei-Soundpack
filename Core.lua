@@ -66,6 +66,11 @@ local DEBUG_MODE = false
 local lastHaste = 0
 local SettingsCategory -- To store the settings category object
 
+-- Timer Frame Globals
+local JinareiTimerFrame
+local TIMER_DURATION = 40
+local TIMER_END_TIME = 0
+
 local function PlaySynchronizedMusic(source, isTest)
     -- Definition de la playlist selon le mode
 
@@ -99,6 +104,81 @@ local function PlaySynchronizedMusic(source, isTest)
         print("|cFF00FF00Jinarei-Soundpack|r: Bloodlust détectée (Source: " .. (source or "Inconnue") .. ")! Musique: " .. track)
     end
     PlaySoundFile(path, channel)
+    
+    -- Trigger Timer
+    if JinareiTimerFrame and JinareiDB.showTimer then
+        JinareiTimerFrame:Show()
+        TIMER_END_TIME = GetTime() + TIMER_DURATION
+        JinareiTimerFrame.cooldown:SetCooldown(GetTime(), TIMER_DURATION)
+    end
+end
+
+local function CreateTimerFrame()
+    if JinareiTimerFrame then return end
+    
+    local f = CreateFrame("Frame", "JinareiTimerFrame", UIParent)
+    f:SetSize(JinareiDB.timerSize or 64, JinareiDB.timerSize or 64)
+    f:SetPoint("CENTER", 0, 100) -- Default pos
+    if JinareiDB.timerPos then
+        f:SetPoint(JinareiDB.timerPos.point, JinareiDB.timerPos.x, JinareiDB.timerPos.y)
+    end
+    
+    f:SetMovable(true)
+    f:EnableMouse(true)
+    f:RegisterForDrag("LeftButton")
+    f:SetScript("OnDragStart", function(self)
+        if not JinareiDB.lockTimer then
+            self:StartMoving()
+        end
+    end)
+    f:SetScript("OnDragStop", function(self)
+        self:StopMovingOrSizing()
+        -- Save position
+        local point, _, _, x, y = self:GetPoint()
+        JinareiDB.timerPos = {point = point, x = x, y = y}
+    end)
+    f:Hide() -- Hide by default
+    
+    -- Icon
+    local icon = f:CreateTexture(nil, "BACKGROUND")
+    icon:SetAllPoints()
+    -- Icone de Bloodlust (Spell ID 2825)
+    icon:SetTexture(C_Spell.GetSpellTexture(2825)) 
+    f.icon = icon
+    
+    -- Cooldown Swipe
+    local cd = CreateFrame("Cooldown", "JinareiTimerCooldown", f, "CooldownFrameTemplate")
+    cd:SetAllPoints()
+    cd:SetReverse(false)
+    cd:SetHideCountdownNumbers(true) -- Cache le texte par défaut de Blizzard (pour éviter le doublon)
+    f.cooldown = cd
+    
+    -- Text
+    local text = f:CreateFontString(nil, "OVERLAY", "GameFontNormalHuge")
+    text:SetPoint("CENTER", 0, 0)
+    text:SetTextColor(1, 1, 1, 1)
+    f.text = text
+    
+    -- Update Loop
+    f:SetScript("OnUpdate", function(self, elapsed)
+        local remaining = TIMER_END_TIME - GetTime()
+        if remaining <= 0 then
+            self:Hide()
+        else
+            -- Format text
+            -- Utilisation de la taille configurée
+            local fs = JinareiDB.timerFontSize or 12
+             -- On doit recréer la font pour changer la taille dynamiquement si elle change
+            local fontName, _ = text:GetFont()
+            text:SetFont(fontName, fs, "OUTLINE")
+            
+            self:SetSize(JinareiDB.timerSize or 64, JinareiDB.timerSize or 64)
+            
+            self.text:SetText(math.ceil(remaining))
+        end
+    end)
+    
+    JinareiTimerFrame = f
 end
 
 
@@ -204,11 +284,71 @@ local function CreateAddonSettingsPanel()
 
     -- Test Button
     local btn = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
-    btn:SetPoint("TOPLEFT", chkNoMeta, "BOTTOMLEFT", 0, -20)
+    btn:SetPoint("TOPLEFT", chkNoMeta, "BOTTOMLEFT", 0, -30)
     btn:SetSize(120, 25)
-    btn:SetText("Tester le son")
+    btn:SetText("Tester le son (+Timer)")
     btn:SetScript("OnClick", function()
-        PlaySynchronizedMusic(nil, true)
+        PlaySynchronizedMusic("TestConfig", true)
+    end)
+
+    -- Header: Timer UI
+    local headerTimer = panel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+    headerTimer:SetPoint("TOPLEFT", btn, "BOTTOMLEFT", 0, -20)
+    headerTimer:SetText("Timer Visuel Bloodlust")
+
+    -- Checkbox: Afficher Timer
+    local chkTimer = CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
+    chkTimer:SetPoint("TOPLEFT", headerTimer, "BOTTOMLEFT", 0, -10)
+    chkTimer.text:SetText("Afficher l'icône du Timer")
+    chkTimer:SetChecked(JinareiDB.showTimer)
+    chkTimer:SetScript("OnClick", function(self)
+        JinareiDB.showTimer = self:GetChecked()
+        if JinareiTimerFrame then if not JinareiDB.showTimer then JinareiTimerFrame:Hide() end end
+    end)
+
+    -- Checkbox: Verrouiller
+    local chkLock = CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
+    chkLock:SetPoint("LEFT", chkTimer.text, "RIGHT", 200, 0)
+    chkLock.text:SetText("Verrouiller la position")
+    chkLock:SetChecked(JinareiDB.lockTimer)
+    chkLock:SetScript("OnClick", function(self)
+        JinareiDB.lockTimer = self:GetChecked()
+    end)
+    
+    -- Slider: Taille Icone
+    local sliderSize = CreateFrame("Slider", "JinareiTimerSizeSlider", panel, "OptionsSliderTemplate")
+    sliderSize:SetPoint("TOPLEFT", chkTimer, "BOTTOMLEFT", 0, -30)
+    sliderSize:SetMinMaxValues(32, 128)
+    sliderSize:SetValue(JinareiDB.timerSize or 64)
+    sliderSize:SetValueStep(1)
+    sliderSize:SetObeyStepOnDrag(true)
+    _G[sliderSize:GetName() .. 'Low']:SetText('32')
+    _G[sliderSize:GetName() .. 'High']:SetText('128')
+    _G[sliderSize:GetName() .. 'Text']:SetText('Taille Icône: ' .. (JinareiDB.timerSize or 64))
+    
+    sliderSize:SetScript("OnValueChanged", function(self, value)
+        local val = math.floor(value)
+        JinareiDB.timerSize = val
+        _G[self:GetName() .. 'Text']:SetText('Taille Icône: ' .. val)
+        if JinareiTimerFrame then JinareiTimerFrame:SetSize(val, val) end
+    end)
+
+    -- Slider: Taille Police
+    local sliderFont = CreateFrame("Slider", "JinareiTimerFontSlider", panel, "OptionsSliderTemplate")
+    sliderFont:SetPoint("LEFT", sliderSize, "RIGHT", 40, 0)
+    sliderFont:SetMinMaxValues(8, 48)
+    sliderFont:SetValue(JinareiDB.timerFontSize or 12)
+    sliderFont:SetValueStep(1)
+    sliderFont:SetObeyStepOnDrag(true)
+    _G[sliderFont:GetName() .. 'Low']:SetText('8')
+    _G[sliderFont:GetName() .. 'High']:SetText('48')
+    _G[sliderFont:GetName() .. 'Text']:SetText('Taille Texte: ' .. (JinareiDB.timerFontSize or 12))
+    
+    sliderFont:SetScript("OnValueChanged", function(self, value)
+        local val = math.floor(value)
+        JinareiDB.timerFontSize = val
+        _G[self:GetName() .. 'Text']:SetText('Taille Texte: ' .. val)
+        -- Refraichissement temps réel dans l'Update du frame
     end)
 end
 
@@ -296,6 +436,12 @@ local function OnEvent(self, event, arg1, arg2, arg3, arg4, ...)
         -- Changed logic vars
         if JinareiDB.noOuioui == nil then JinareiDB.noOuioui = false end
         if JinareiDB.noMetacopter == nil then JinareiDB.noMetacopter = false end
+        
+        -- Timer defaults
+        if JinareiDB.showTimer == nil then JinareiDB.showTimer = false end
+        if JinareiDB.lockTimer == nil then JinareiDB.lockTimer = false end
+        if not JinareiDB.timerSize then JinareiDB.timerSize = 64 end
+        if not JinareiDB.timerFontSize then JinareiDB.timerFontSize = 20 end
 
         -- Apply globals
         DEBUG_MODE = JinareiDB.showDebug
@@ -305,6 +451,7 @@ local function OnEvent(self, event, arg1, arg2, arg3, arg4, ...)
     elseif event == "PLAYER_LOGIN" then
         CreateAddonSettingsPanel()
         CreateMinimapButton()
+        CreateTimerFrame()
         lastHaste = UnitSpellHaste("player") -- Initialize haste on login
         print("|cFF00FF00Jinarei-Soundpack|r: Prêt (v1.0.28).")
         
