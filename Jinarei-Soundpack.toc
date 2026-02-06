@@ -2,7 +2,7 @@
 ## Title: Jinarei-Soundpack
 ## Notes: Addon de Jinarei pour gérer une bibliothèque de sons.
 ## Author: Jinarei
-## Version: 1.0.27
+## Version: 1.0.28
 ## SavedVariables: JinareiDB
 
 libs\LibStub\LibStub.lua
