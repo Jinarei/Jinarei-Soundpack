@@ -33,23 +33,15 @@ local MusicList = {
     "bloodlustjin.ogg", -- Metacoptere
 }
 
--- IDs des sorts considérés comme Bloodlust / Heroism
-local BL_SPELL_IDS = {
-    [2825] = true,    -- Bloodlust (Shaman)
-    [32182] = true,   -- Heroism (Shaman)
-    [80353] = true,   -- Time Warp (Mage)
-    [264667] = true,  -- Primal Rage (Hunter Pet)
-    [390386] = true,  -- Fury of the Aspects (Evoker)
-    [102364] = true,  -- Drums (Exemple générique, à vérifier selon les versions)
-    [256740] = true,
-    [230935] = true,
-    [292686] = true,
-    [178207] = true,
-    [386540] = true,
-    [381301] = true,
-    [444257] = true,
-    [466904] = true,
-    [461476] = true, -- Might be missing from original, just keeping previous list logic mostly
+-- IDs des debuffs de Sated / Exhaustion
+local SATED_SPELL_IDS = {
+    [57723] = true,   -- Exhaustion (Heroism)
+    [57724] = true,   -- Sated (Bloodlust)
+    [80354] = true,   -- Temporal Displacement (Time Warp)
+    [95809] = true,   -- Insanity (Hunter Pet)
+    [160455] = true,  -- Fatigued (Hunter Pet)
+    [264689] = true,  -- Fatigued (Hunter Pet)
+    [390435] = true,  -- Exhaustion (Evoker)
 }
 
 -- =========================================================================
@@ -103,7 +95,6 @@ local MplusDepletePlayed = false
 local eventFrame = CreateFrame("Frame", "JinareiEventFrame")
 eventFrame:RegisterEvent("ADDON_LOADED")
 eventFrame:RegisterEvent("PLAYER_LOGIN")
-eventFrame:RegisterEvent("UNIT_SPELL_HASTE")
 eventFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 eventFrame:RegisterEvent("PLAYER_DEAD")
 eventFrame:RegisterEvent("PLAYER_ALIVE")
@@ -116,7 +107,6 @@ eventFrame:RegisterEvent("UNIT_AURA")
 
 local ADDON_PREFIX = "JINAREI_SP"
 local DEBUG_MODE = false 
-local lastHaste = 0
 local SettingsCategory -- To store the settings category object
 
 local GAS_SPELL_IDS = {
@@ -838,21 +828,6 @@ end
 function TriggerDeath_Test() TriggerDeath() end
 
 
-local function HasBloodlustBuff()
-    if JinareiDB.showDebug then print("|cFF00FFFF[DEBUG]|r Verifying against BL_SPELL_IDS list...") end
-    
-    for spellId, _ in pairs(BL_SPELL_IDS) do
-        local aura = C_UnitAuras.GetPlayerAuraBySpellID(spellId)
-        if aura then
-            if JinareiDB.showDebug then print("|cFF00FFFF[DEBUG]|r Match found in list! ID: " .. spellId) end
-            return true
-        end
-    end
-
-    if JinareiDB.showDebug then print("|cFF00FFFF[DEBUG]|r No match found in BL_SPELL_IDS.") end
-    return false
-end
-
 local function OnEvent(self, event, arg1, arg2, arg3, arg4, ...)
     if event == "ADDON_LOADED" and arg1 == "Jinarei-Soundpack" then
         -- Init SavedVariables correctly when addon loads
@@ -893,46 +868,7 @@ local function OnEvent(self, event, arg1, arg2, arg3, arg4, ...)
         CreateTimerFrame()
 
         InitPauseListeners()
-        lastHaste = UnitSpellHaste("player") -- Initialize haste on login
         print("|cFF00FF00Jinarei-Soundpack|r: Prêt (v1.0.28).")
-        
-    elseif event == "UNIT_SPELL_HASTE" then
-        local unit = arg1
-        if unit == "player" then
-            local currentHaste = UnitSpellHaste("player")
-            if lastHaste then
-                local diff = currentHaste - lastHaste
-                -- On cherche une augmentation subite de ~30% (Bloodlust = 30%)
-                -- On met 29.5 pour être sûr de capter même si petit arrondi
-                if diff >= 29.5 then
-                     -- Petite pause pour laisser le temps au serveur/client d'appliquer l'aura
-                     C_Timer.After(0.1, function()
-                         local shouldTrigger = false
-                         
-                         if InCombatLockdown() then
-                             shouldTrigger = true
-                         else
-                             -- Double verification si hors combat: On scanne la liste des buffs BL
-                             if HasBloodlustBuff() then
-                                 shouldTrigger = true
-                             else
-                                 if JinareiDB.showDebug then
-                                     print("|cFF00FFFF[DEBUG]|r Haste Spike ignores (Hors combat + Pas de buff BL dans la liste).")
-                                 end
-                             end
-                         end
-
-                         if shouldTrigger then
-                             if JinareiDB.showDebug then
-                                 print("|cFF00FFFF[DEBUG]|r Haste Spike Detected: +" .. string.format("%.2f", diff) .. "%")
-                             end
-                             PlaySynchronizedMusic("HasteDetection")
-                         end
-                     end)
-                end
-            end
-            lastHaste = currentHaste
-        end
         
     elseif event == "PLAYER_DEAD" then
         TriggerDeath()
@@ -948,28 +884,39 @@ local function OnEvent(self, event, arg1, arg2, arg3, arg4, ...)
         
     elseif event == "UNIT_AURA" then
          local unit = arg1
-         if unit == "player" and JinareiDB.enableLevitate then
+         if unit == "player" then
              -- Check Levitate
-             local aura = C_UnitAuras.GetPlayerAuraBySpellID(SPELL_LEVITATE)
-             -- Pour éviter le spam, on pourrait checker si on l'avait pas avant, mais UNIT_AURA spamme un peu.
-             -- On va juste jouer le son si l'aura est refresh ou appliquée.
-             -- Idéalement on garde un state, mais faisons simple : play si presence. 
-             -- Mais UNIT_AURA proc souvent. Faut un debounce.
-             -- Simple debounce generic sur le spellId ?
-             if aura then
-                 if not aura.wasPresent then -- Hacky flag? No.
-                     -- Check last play time
-                    local now = GetTime()
-                    if not JinareiDB.lastLevitate or (now - JinareiDB.lastLevitate > 2) then
-                         PlaySoundFile("Interface\\AddOns\\Jinarei-Soundpack\\Sounds\\levitation.mp3", JinareiDB.channel or "Master")
-                         JinareiDB.lastLevitate = now
-                         if JinareiDB.showDebug then print("|cFF00FFFF[DEBUG]|r Levitation Detected!") end
-                    end
+             if JinareiDB.enableLevitate then
+                 local aura = C_UnitAuras.GetPlayerAuraBySpellID(SPELL_LEVITATE)
+                 if aura then
+                     local currentLevAuraID = aura.auraInstanceID or aura.expirationTime
+                     if self.lastLevitateInstanceID ~= currentLevAuraID then
+                          self.lastLevitateInstanceID = currentLevAuraID
+                          PlaySoundFile("Interface\\AddOns\\Jinarei-Soundpack\\Sounds\\levitation.mp3", JinareiDB.channel or "Master")
+                          if JinareiDB.showDebug then print("|cFF00FFFF[DEBUG]|r Levitation Detected!") end
+                     end
+                 end
+             end
+             
+             -- Check Sated / Exhaustion
+             for spellId in pairs(SATED_SPELL_IDS) do
+                 local aura = C_UnitAuras.GetPlayerAuraBySpellID(spellId)
+                 if aura then
+                     local remaining = (aura.expirationTime or 0) - GetTime()
+                     -- Verify it's more than 9 minutes (540 seconds)
+                     if remaining > 540 then
+                         local currentBLAuraID = aura.auraInstanceID or aura.expirationTime
+                         if self.lastBLInstanceID ~= currentBLAuraID then
+                             self.lastBLInstanceID = currentBLAuraID
+                             if JinareiDB.showDebug then
+                                 print("|cFF00FFFF[DEBUG]|r Sated/Exhaustion Detected! ID: " .. spellId .. " Remaining: " .. math.floor(remaining) .. "s")
+                             end
+                             PlaySynchronizedMusic("SatedDetection")
+                         end
+                     end
                  end
              end
          end
-
-
 
     elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
         local unit, _, spellId = arg1, arg2, arg3
