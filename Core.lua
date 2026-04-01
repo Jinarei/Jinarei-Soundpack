@@ -48,6 +48,7 @@ local SATED_SPELL_IDS = {
 -- IMAGES PAUSE
 -- =========================================================================
 
+--[[ PAUSE APRIL FOOLS
 local PauseImages = {
     { path = "Interface\\AddOns\\Jinarei-Soundpack\\Images\\img1.jpg",  width = 213, height = 260 },   
     { path = "Interface\\AddOns\\Jinarei-Soundpack\\Images\\img2.jpg",  width = 442, height = 260 },   
@@ -78,6 +79,11 @@ local PauseImages = {
     { path = "Interface\\AddOns\\Jinarei-Soundpack\\Images\\img27.png", width = 319, height = 260 },   
     { path = "Interface\\AddOns\\Jinarei-Soundpack\\Images\\img28.jpg", width = 119, height = 260 }
 }
+]]
+
+local PauseImages = {
+    { path = "Interface\\AddOns\\Jinarei-Soundpack\\Images\\pause.jpg",  width = 442, height = 260 }
+}
 
 -- IDs Additionnels
 local SPELL_LEVITATE = 111759
@@ -85,7 +91,6 @@ local SPELL_LEVITATE = 111759
 
 -- Globaux Modules
 local JinareiDeathFrame
-local MplusEndTime = nil
 local MplusDepletePlayed = false
 
 -- =========================================================================
@@ -305,35 +310,45 @@ end
 -- LOGIQUE MYTHIC+ DEPLETE
 -- =========================================================================
 local function StartMplusTimer()
-    local _, _, difficulty, _, _, _, _, _, _ = GetInstanceInfo()
+    --[[ PAUSE MOMENTANEE
+    local _, _, difficulty = GetInstanceInfo()
     if difficulty == 8 then -- Mythic Keystone
-        local mapID = C_ChallengeMode.GetActiveChallengeMapID()
-        if mapID then
-            local _, _, timeLimit = C_ChallengeMode.GetMapUIInfo(mapID)
-            if timeLimit and timeLimit > 0 then
-                MplusEndTime = GetTime() + timeLimit
-                MplusDepletePlayed = false
-                if JinareiDB.showDebug then print("|cFF00FFFF[DEBUG]|r M+ Timer Started. Limit: " .. timeLimit .. "s") end
-            end
-        end
-    else
-        MplusEndTime = nil
+        MplusDepletePlayed = false
+        if JinareiDB.showDebug then print("|cFF00FFFF[DEBUG]|r M+ Timer Started.") end
     end
+    ]]
 end
 
 local function CheckMplusDeplete()
-    if not JinareiDB.enableDeplete or not MplusEndTime then return end
+    --[[ PAUSE MOMENTANEE
+    if not JinareiDB.enableDeplete then return end
+    if MplusDepletePlayed then return end
     
-    if not MplusDepletePlayed and GetTime() > MplusEndTime then
-        if JinareiDB.showDebug then print("|cFF00FFFF[DEBUG]|r M+ Key Depleted!") end
+    local _, _, difficulty = GetInstanceInfo()
+    if difficulty ~= 8 then return end
+    
+    local cmap = C_ChallengeMode.GetActiveChallengeMapID()
+    if not cmap then return end
+    
+    local _, _, timeLimit = C_ChallengeMode.GetMapUIInfo(cmap)
+    if not timeLimit or timeLimit <= 0 then return end
+    
+    local timeElapsed = select(2, GetWorldElapsedTime(1)) or 0
+    local _, timeLost = C_ChallengeMode.GetDeathCount()
+    
+    local totalTime = timeElapsed + (timeLost or 0)
+    
+    if totalTime >= timeLimit then
+        if JinareiDB.showDebug then print("|cFF00FFFF[DEBUG]|r M+ Key Depleted! (Live Check)") end
         PlaySoundFile("Interface\\AddOns\\Jinarei-Soundpack\\Sounds\\deplete.ogg", JinareiDB.channel or "Master")
         MplusDepletePlayed = true
     end
+    ]]
 end
 
 local function StopMplusTimer()
-    MplusEndTime = nil
-    MplusDepletePlayed = false
+    -- PAUSE MOMENTANEE
+    -- MplusDepletePlayed = false
 end
 
 -- =========================================================================
@@ -357,7 +372,11 @@ local function TriggerPause(duration)
     end
 
     -- Play Sound
+    --[[ PAUSE APRIL FOOLS
     local soundPath = "Interface\\AddOns\\Jinarei-Soundpack\\Sounds\\pause.ogg"
+    PlaySoundFile(soundPath, JinareiDB.channel or "Master")
+    ]]
+    local soundPath = "Interface\\AddOns\\Jinarei-Soundpack\\Sounds\\pausenew.ogg"
     PlaySoundFile(soundPath, JinareiDB.channel or "Master")
 
     -- Setup Frame
@@ -879,7 +898,20 @@ local function OnEvent(self, event, arg1, arg2, arg3, arg4, ...)
     elseif event == "CHALLENGE_MODE_START" then
         StartMplusTimer()
         
-    elseif event == "CHALLENGE_MODE_COMPLETED" or event == "CHALLENGE_MODE_RESET" then
+    elseif event == "CHALLENGE_MODE_COMPLETED" then
+        --[[ PAUSE MOMENTANEE
+        if JinareiDB.enableDeplete and not MplusDepletePlayed then
+            local info = C_ChallengeMode.GetChallengeCompletionInfo()
+            if info and info.onTime == false then
+                 if JinareiDB.showDebug then print("|cFF00FFFF[DEBUG]|r M+ Key Depleted! (Official End)") end
+                 PlaySoundFile("Interface\\AddOns\\Jinarei-Soundpack\\Sounds\\deplete.ogg", JinareiDB.channel or "Master")
+                 MplusDepletePlayed = true
+            end
+        end
+        ]]
+        StopMplusTimer()
+        
+    elseif event == "CHALLENGE_MODE_RESET" then
         StopMplusTimer()
         
     elseif event == "UNIT_AURA" then
@@ -903,8 +935,8 @@ local function OnEvent(self, event, arg1, arg2, arg3, arg4, ...)
                  local aura = C_UnitAuras.GetPlayerAuraBySpellID(spellId)
                  if aura then
                      local remaining = (aura.expirationTime or 0) - GetTime()
-                     -- Verify it's more than 9 minutes (540 seconds)
-                     if remaining > 540 then
+                     -- Verify it's at the very beginning (more than 9 minutes and 58 seconds) to prevent re-triggering after teleport
+                     if remaining >= 598 then
                          local currentBLAuraID = aura.auraInstanceID or aura.expirationTime
                          if self.lastBLInstanceID ~= currentBLAuraID then
                              self.lastBLInstanceID = currentBLAuraID
