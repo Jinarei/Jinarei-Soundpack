@@ -48,7 +48,6 @@ local SATED_SPELL_IDS = {
 -- IMAGES PAUSE
 -- =========================================================================
 
---[[ PAUSE APRIL FOOLS
 local PauseImages = {
     { path = "Interface\\AddOns\\Jinarei-Soundpack\\Images\\img1.jpg",  width = 213, height = 260 },   
     { path = "Interface\\AddOns\\Jinarei-Soundpack\\Images\\img2.jpg",  width = 442, height = 260 },   
@@ -78,11 +77,6 @@ local PauseImages = {
     { path = "Interface\\AddOns\\Jinarei-Soundpack\\Images\\img26.jpg", width = 194, height = 260 },  
     { path = "Interface\\AddOns\\Jinarei-Soundpack\\Images\\img27.png", width = 319, height = 260 },   
     { path = "Interface\\AddOns\\Jinarei-Soundpack\\Images\\img28.jpg", width = 119, height = 260 }
-}
-]]
-
-local PauseImages = {
-    { path = "Interface\\AddOns\\Jinarei-Soundpack\\Images\\pause.jpg",  width = 442, height = 260 }
 }
 
 -- IDs Additionnels
@@ -372,11 +366,7 @@ local function TriggerPause(duration)
     end
 
     -- Play Sound
-    --[[ PAUSE APRIL FOOLS
     local soundPath = "Interface\\AddOns\\Jinarei-Soundpack\\Sounds\\pause.ogg"
-    PlaySoundFile(soundPath, JinareiDB.channel or "Master")
-    ]]
-    local soundPath = "Interface\\AddOns\\Jinarei-Soundpack\\Sounds\\pausenew.ogg"
     PlaySoundFile(soundPath, JinareiDB.channel or "Master")
 
     -- Setup Frame
